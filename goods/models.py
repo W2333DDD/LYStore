@@ -13,7 +13,7 @@ class Product(models.Model):
     name = models.CharField(max_length=100, verbose_name="商品名称")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="商品价格")
     description = models.TextField(blank=True, verbose_name="商品简介")
-
+    category = models.TextField(null=False,default='未分类',verbose_name='商品分类')
     image = models.ImageField(upload_to='product_images/', verbose_name="商品图片", blank=True, null=True)
     video = models.FileField(upload_to='product_videos/', verbose_name="商品视频", blank=True, null=True)
     tripo_3d_model = models.FileField(upload_to='3d_models/', verbose_name="3D模型",null=True, blank=True)

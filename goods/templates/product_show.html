@@ -95,8 +95,9 @@
       <button onclick="showMedia('video')">视频</button>
     {% endif %}
     {% if product.tripo_3d_model %}
-      <button onclick="showMedia('model')">3D 模型</button>
+      <button onclick="showMedia('model')" data-model-url="{{ product.tripo_3d_model.url }}" id="modelButton">3D 模型</button>
     {% endif %}
+
   </div>
 
   <div class="media-display" id="mediaDisplay">
@@ -106,7 +107,7 @@
     {% if product.video %}
       <video src="{{ product.video.url }}" id="mediaVideo" controls></video>
     {% endif %}
-    {% if product.tripo_3d_model %}
+    {% if product.tripo_3d_model%}
       <div id="model-container"></div>
     {% endif %}
   </div>
@@ -146,10 +147,12 @@
   </div>
 </div>
 
-<!-- Three.js 和 OrbitControls 依赖 -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/loaders/GLTFLoader.js"></script>
+<!-- 引入 three.js 库 -->
+<!-- 先引入three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- 再引入GLTFLoader -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
   function showMedia(type) {
@@ -173,46 +176,55 @@
   }
 
   function load3DModel() {
-    const container = document.getElementById("model-container");
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setClearColor(0xf0f0f0);
-    container.appendChild(renderer.domElement);
-
-    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 5);
-    scene.add(light);
-
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-
-    const loader = new THREE.GLTFLoader();
-    loader.load(
-      "{{ product.tripo_3d_model.url }}",
-      function(gltf) {
-        console.log("模型加载成功！");
-        gltf.scene.scale.set(2, 2, 2);
-        scene.add(gltf.scene);
-        camera.position.set(0, 1, 5);
-
-        function animate() {
-          requestAnimationFrame(animate);
-          controls.update();
-          renderer.render(scene, camera);
-        }
-        animate();
-        alert("3D 模型加载成功！");
-      },
-      function(xhr) {
-        console.log('加载进度: ' + (xhr.loaded / xhr.total * 100) + '%');
-      },
-      function(error) {
-        console.error("加载3D模型时出错：", error);
-        alert("加载3D模型失败，请检查文件路径或格式！");
+      const modelUrl = document.getElementById("modelButton").getAttribute("data-model-url");
+      if (!modelUrl) {
+        alert("没有可用的模型文件。");
+        return;
       }
-    );
-  }
+
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(75, document.getElementById("model-container").clientWidth / document.getElementById("model-container").clientHeight, 0.1, 1000);
+      var renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(document.getElementById("model-container").clientWidth, document.getElementById("model-container").clientHeight);
+      renderer.setClearColor(0xf0f0f0);
+      document.getElementById("model-container").appendChild(renderer.domElement);
+
+      var light = new THREE.HemisphereLight(0xffffff, 0x444444, 5);
+      scene.add(light);
+
+      var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.enableZoom = true;
+      controls.enableRotate = true;
+
+      var loader = new THREE.GLTFLoader();
+      loader.load(
+        modelUrl,
+        function(gltf) {
+          console.log("模型加载成功！");
+          scene.add(gltf.scene);
+          gltf.scene.scale.set(2, 2, 2);
+          camera.position.set(0, 1, 5);
+
+          var animate = function() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+          };
+          animate();
+          alert("3D 模型加载成功！");
+        },
+        function(xhr) {
+          console.log('加载进度: ' + (xhr.loaded / xhr.total * 100) + '%');
+        },
+        function(error) {
+          console.error("加载3D模型时出错：", error);
+          alert("加载3D模型失败，请检查文件路径或格式！");
+        }
+      );
+    }
+
 </script>
+
 {% endblock %}

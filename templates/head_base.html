@@ -115,8 +115,9 @@
     <span>欢迎来到仿京东商城</span>
     {% if user.is_authenticated %}
       <span style="margin-left: 15px;">欢迎你，{{ user.username }}</span>
+        <a href="{% url 'apppage:firstpage' %}">首页</a>
       <a href="{% url 'usr:logout' %}">退出登录</a>
-      <a href="#">我的订单</a>
+        <a href="{% url 'cart:view' %}">🛒 我的购物车</a>
       <a href="{% url 'usr:usrhome' %}">个人中心</a>
     {% else %}
       <a href="{% url 'usr:login' %}">登录</a>

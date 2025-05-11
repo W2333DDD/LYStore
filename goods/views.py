@@ -37,74 +37,84 @@ def good_detail(request, pk):
 # 创建 Tripo3D 模型视图
 def create_tripo_model(request, pk):
     if request.method == 'POST':
-        try:
-            product = Product.objects.get(pk=pk)
+        user=request.user
+        user_coin=user.gold_coins
+        if user_coin < 5:
+            return JsonResponse({'success': False, 'message': '金币不足无法创建'})
+        else:
+            print(f'当前用户金额为{user_coin}')
+            user.gold_coins-=5
+            user.save()
+            user_coin = user.gold_coins
+            print(f'之后{user_coin}')
+            try:
+                product = Product.objects.get(pk=pk)
 
-            if not product.image:
-                return JsonResponse({'success': False, 'message': '无法创建3D模型：商品没有图片。'})
+                if not product.image:
+                    return JsonResponse({'success': False, 'message': '无法创建3D模型：商品没有图片。'})
 
-            print("原始 image.name:", product.image.name)
-            print("原始 image.path:", product.image.path)
+                print("原始 image.name:", product.image.name)
+                print("原始 image.path:", product.image.path)
 
-            # 使用固定英文名上传，避免编码问题
-            with product.image.open('rb') as f:
-                files = {
-                    'file': ('upload.jpg', f, 'image/jpeg')
+                # 使用固定英文名上传，避免编码问题
+                with product.image.open('rb') as f:
+                    files = {
+                        'file': ('upload.jpg', f, 'image/jpeg')
+                    }
+                    headers = {
+                        'Authorization': f'Bearer {TRIPO3D_API_KEY}'
+                    }
+
+                    print("开始上传图片到 Tripo3D...")
+                    upload_response = requests.post(TRIPO3D_UPLOAD_URL, headers=headers, files=files)
+                    print("上传响应状态码：", upload_response.status_code)
+                    print("上传响应内容：", upload_response.text)
+
+                if upload_response.status_code != 200:
+                    return JsonResponse({'success': False, 'message': '上传图片失败。'})
+
+                upload_data = upload_response.json()
+                file_token = upload_data.get('data', {}).get('image_token')
+
+                if not file_token:
+                    return JsonResponse({'success': False, 'message': '未获取到文件token。'})
+
+                task_data = {
+                    "type": "image_to_model",
+                    "file": {
+                        "type": "jpg",
+                        "file_token": file_token
+                    }
                 }
-                headers = {
-                    'Authorization': f'Bearer {TRIPO3D_API_KEY}'
+
+                task_headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {TRIPO3D_API_KEY}"
                 }
 
-                print("开始上传图片到 Tripo3D...")
-                upload_response = requests.post(TRIPO3D_UPLOAD_URL, headers=headers, files=files)
-                print("上传响应状态码：", upload_response.status_code)
-                print("上传响应内容：", upload_response.text)
+                print("开始创建3D模型任务...")
+                task_response = requests.post(TRIPO3D_TASK_URL, headers=task_headers, json=task_data)
+                print("任务响应状态码：", task_response.status_code)
+                print("任务响应内容：", task_response.text)
 
-            if upload_response.status_code != 200:
-                return JsonResponse({'success': False, 'message': '上传图片失败。'})
+                if task_response.status_code != 200:
+                    return JsonResponse({'success': False, 'message': '3D建模任务创建失败。'})
 
-            upload_data = upload_response.json()
-            file_token = upload_data.get('data', {}).get('image_token')
+                task_data = task_response.json()
+                task_id = task_data.get('data', {}).get('task_id')
 
-            if not file_token:
-                return JsonResponse({'success': False, 'message': '未获取到文件token。'})
+                if not task_id:
+                    return JsonResponse({'success': False, 'message': '任务ID获取失败。'})
 
-            task_data = {
-                "type": "image_to_model",
-                "file": {
-                    "type": "jpg",
-                    "file_token": file_token
-                }
-            }
+                product.tripo_task_id = task_id
+                product.tripo_status = '生成中'
+                product.save()
 
-            task_headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {TRIPO3D_API_KEY}"
-            }
+                return JsonResponse({'success': True, 'message': '3D模型已开始生成，请稍后刷新页面查看。'})
 
-            print("开始创建3D模型任务...")
-            task_response = requests.post(TRIPO3D_TASK_URL, headers=task_headers, json=task_data)
-            print("任务响应状态码：", task_response.status_code)
-            print("任务响应内容：", task_response.text)
-
-            if task_response.status_code != 200:
-                return JsonResponse({'success': False, 'message': '3D建模任务创建失败。'})
-
-            task_data = task_response.json()
-            task_id = task_data.get('data', {}).get('task_id')
-
-            if not task_id:
-                return JsonResponse({'success': False, 'message': '任务ID获取失败。'})
-
-            product.tripo_task_id = task_id
-            product.tripo_status = '生成中'
-            product.save()
-
-            return JsonResponse({'success': True, 'message': '3D模型已开始生成，请稍后刷新页面查看。'})
-
-        except Exception as e:
-            print("发生异常：", str(e))
-            return JsonResponse({'success': False, 'message': f'创建失败：{str(e)}'})
+            except Exception as e:
+                print("发生异常：", str(e))
+                return JsonResponse({'success': False, 'message': f'创建失败：{str(e)}'})
 
     return JsonResponse({'success': False, 'message': '无效请求'})
 
@@ -199,6 +209,12 @@ def search_view(request):
     print(f"query={query}, results={results}")
     return render(request, 'search_results.html', {'query': query, 'results': results})
 
+# views.py
+
+def category_view(request):
+    query = request.GET.get('q', '')
+    results = Product.objects.filter(category=query) if query else []
+    return render(request, 'search_results.html', {'query': query, 'results': results})
 
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404

@@ -1,0 +1,148 @@
+{% extends 'head_base.html' %}
+
+{% block content %}
+<h2 class="cart-title">我的购物车</h2>
+
+{% if cart_items %}
+<div class="cart-container">
+    {% for item in cart_items %}
+    <div class="cart-item">
+        <div class="cart-item-inner">
+            <div class="cart-item-image">
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+            </div>
+            <div class="cart-item-details">
+                <h3>{{ item.product.name }}</h3>
+                <p>数量: {{ item.quantity }}</p>
+                <p>单价: ¥{{ item.product.price }}</p>
+                <p>总价: ¥{{ item.quantity|floatformat:2|add:""|add:item.product.price }}</p>
+                <p>
+                    数量:
+                    <a href="{% url 'cart:decrease' item.id %}" class="quantity-btn">−</a>
+                    {{ item.quantity }}
+                    <a href="{% url 'cart:increase' item.id %}" class="quantity-btn">＋</a>
+                </p>
+                <a href="{% url 'cart:remove' item.id %}" class="remove-item">删除</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="checkout-btn-container">
+    <a href="{% url 'cart:pay' %}" class="checkout-btn">去结算总金额{{ total_price }}</a>
+</div>
+
+{% else %}
+<p>你的购物车为空。</p>
+{% endif %}
+
+{% endblock %}
+
+{% block style %}
+<style>
+    /* 购物车标题 */
+    .cart-title {
+        text-align: center;
+        font-size: 2em;
+        margin-bottom: 20px;
+    }
+
+    /* 购物车容器 */
+    .cart-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    /* 每个商品的容器 */
+    .cart-item {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .cart-item:hover {
+        transform: scale(1.05);  /* 缩放效果 */
+    }
+
+    /* 商品内容部分 */
+    .cart-item-inner {
+        display: flex;
+        padding: 15px;
+    }
+
+    /* 商品图片 */
+    .cart-item-image {
+        flex-shrink: 0;
+        margin-right: 15px;
+    }
+
+    .cart-item-image img {
+        max-width: 100px;
+        max-height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    /* 商品详情 */
+    .cart-item-details {
+        flex-grow: 1;
+    }
+
+    .cart-item-details h3 {
+        margin-top: 0;
+    }
+
+    .cart-item-details p {
+        margin: 5px 0;
+    }
+
+    .remove-item {
+        color: #ff4d4d;
+        text-decoration: none;
+    }
+
+    .remove-item:hover {
+        text-decoration: underline;
+    }
+
+    /* 结算按钮 */
+    .checkout-btn-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+
+    .checkout-btn {
+        background-color: #ff6f61;
+        color: white;
+        padding: 12px 20px;
+        font-size: 1.2em;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+    }
+
+    .checkout-btn:hover {
+        background-color: #e65c4d;
+    }
+    .quantity-btn {
+    display: inline-block;
+    padding: 0 10px;
+    color: #333;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1.2em;
+    }
+
+    .quantity-btn:hover {
+        color: #ff6f61;
+    }
+
+</style>
+{% endblock %}

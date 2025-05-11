@@ -57,3 +57,36 @@ def logout_view(request):
 def usr_home(request):
     store = Shop.objects.filter(owner=request.user, is_approved=True).first()
     return render(request,'usrhome.html',{'store':store})
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render
+from django.contrib import messages
+from .models import GoldRecharge
+
+@login_required
+def submit_recharge(request):
+    if request.method == 'POST':
+        amount = int(request.POST.get('amount'))
+        if amount <= 0:
+            messages.error(request, '充值金额必须大于0')
+            return redirect('usr:usrhome')
+
+        GoldRecharge.objects.create(user=request.user, amount=amount, status='waiting')
+        messages.success(request, '充值申请已提交，请等待管理员审核。')
+        return redirect('usr:usrhome')
+
+
+# views.py
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.contrib import messages
+
+@login_required
+def update_address(request):
+    if request.method == 'POST':
+        new_address = request.POST.get('new_address')
+        request.user.address = new_address
+        request.user.save()
+        messages.success(request, '地址已更新')
+    return redirect('usr:usrhome')  # 替换成用户中心页的URL name

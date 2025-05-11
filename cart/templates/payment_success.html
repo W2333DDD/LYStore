@@ -1,0 +1,7 @@
+{% extends 'head_base.html' %}
+{% block content %}
+    <h2>支付成功</h2>
+    <p>您的订单已成功支付。</p>
+    <p>订单ID: {{ order.id }}</p>
+    <p>支付金额: {{ order.total_price }} 金币</p>
+{% endblock %}

@@ -33,7 +33,7 @@ class Shop(models.Model):
 
     is_approved = models.BooleanField(default=False, verbose_name="是否通过审核")  # ✅ 审核字段
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="注册时间")
-
+    total_gold_coins = models.PositiveIntegerField(default=0)
     def __str__(self):
         return self.name
 

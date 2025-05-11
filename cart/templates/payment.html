@@ -1,0 +1,17 @@
+{% extends 'head_base.html' %}
+{% block content %}
+    <h2>支付页面</h2>
+    <p>订单总金额: {{ total_price }} 金币</p>
+    <p>您的金币余额: {{ request.user.gold_coins }} 金币</p>
+
+{#    {% if messages %}#}
+{#        <div class="messages">#}
+{#            {% for message in messages %}#}
+{#                <div class="alert alert-danger">{{ message }}</div>#}
+{#            {% endfor %}#}
+{#        </div>#}
+{#    {% endif %}#}
+
+<h2>您的金额不足，请充值后重新尝试</h2>
+
+{% endblock %}

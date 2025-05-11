@@ -309,8 +309,9 @@
       <span>欢迎来到仿京东商城</span>
       {% if user.is_authenticated %}
         <span style="margin-left: 15px;">欢迎你，{{ user.username }}</span>
+        <a href="{% url 'apppage:firstpage' %}">首页</a>
         <a href="{% url 'usr:logout' %}">退出登录</a>
-        <a href="#">我的订单</a>
+        <a href="{% url 'cart:view' %}">🛒 我的购物车</a>
         <a href={% url 'usr:usrhome' %}>个人中心</a>
       {% else %}
         <a href="{% url 'usr:login' %}">登录</a>
@@ -345,42 +346,70 @@
   <div class="main">
     <div class="sidebar">
       <h3>商品分类</h3>
-      <ul>
-        <li><a href="#">手机通讯</a></li>
-        <li><a href="#">电脑办公</a></li>
-        <li><a href="#">家用电器</a></li>
-        <li><a href="#">服饰鞋包</a></li>
-        <li><a href="#">图书音像</a></li>
-        <li><a href="#">母婴用品</a></li>
-        <li><a href="#">食品饮料</a></li>
-      </ul>
+        <ul>
+          <li><a href="{% url 'goods:category_view' %}?q=手机通讯">手机通讯</a></li>
+          <li><a href="{% url 'goods:category_view' %}?q=电脑办公">电脑办公</a></li>
+          <li><a href="{% url 'goods:category_view' %}?q=家用电器">家用电器</a></li>
+          <li><a href="{% url 'goods:category_view' %}?q=服饰鞋包">服饰鞋包</a></li>
+          <li><a href="{% url 'goods:category_view' %}?q=图书音像">图书音像</a></li>
+          <li><a href="{% url 'goods:category_view' %}?q=母婴用品">母婴用品</a></li>
+          <li><a href="{% url 'goods:category_view' %}?q=食品饮料">食品饮料</a></li>
+        </ul>
     </div>
     <div class="content">
       <div class="product-grid">
-        <div class="product-card">
-          <img src={% static "img/jw.jpg" %} alt="商品图">
-          <div class="product-name">计算机网络</div>
-          <div class="product-desc">好书，买！！！</div>
-          <div class="product-price">￥9.9</div>
-        </div>
-        <div class="product-card">
-          <img src={% static "img/ty.jpg" %} alt="商品图">
-          <div class="product-name">通信原理</div>
-            <div class="product-desc">书好，买！！！</div>
-          <div class="product-price">￥9.8</div>
-        </div>
-        <div class="product-card">
-          <img src={% static "img/ss.jpg" %} alt="商品图">
-          <div class="product-name">信号与系统</div>
-            <div class="product-desc">好好，买！！！</div>
-          <div class="product-price">￥9.7</div>
-        </div>
-        <div class="product-card">
-          <img src={% static "img/networkdg.jpg" %} alt="商品图">
-          <div class="product-name">网络程序设计</div>
-            <div class="product-desc">书书，买！！！</div>
-          <div class="product-price">￥9.6</div>
-        </div>
+
+
+
+        <a href="{% url 'goods:product_show' product1.id %}">
+            <div class="product-card">
+              <img src={{ product1.image.url }} alt="商品图">
+                <div class="product-name">{{ product1.name }}</div>
+                <div class="product-desc">{{ product1.description }}</div>
+                <div class="product-price">{{ product1.price }}</div>
+                <form method="post" action="{% url 'cart:add' product1.id %}">
+                  {% csrf_token %}
+                  <button type="submit">加入购物车</button>
+                </form>
+            </div>
+        </a>
+        <a href="{% url 'goods:product_show' product2.id %}">
+            <div class="product-card">
+              <img src={{ product2.image.url }} alt="商品图">
+                <div class="product-name">{{ product2.name }}</div>
+                <div class="product-desc">{{ product2.description }}</div>
+                <div class="product-price">{{ product2.price }}</div>
+                <form method="post" action="{% url 'cart:add' product2.id %}">
+                  {% csrf_token %}
+                  <button type="submit">加入购物车</button>
+                </form>
+            </div>
+        </a>
+        <a href="{% url 'goods:product_show' product3.id %}">
+            <div class="product-card">
+              <img src={{ product3.image.url }} alt="商品图">
+                <div class="product-name">{{ product3.name }}</div>
+                <div class="product-desc">{{ product3.description }}</div>
+                <div class="product-price">{{ product3.price }}</div>
+                <form method="post" action="{% url 'cart:add' product3.id %}">
+                  {% csrf_token %}
+                  <button type="submit">加入购物车</button>
+                </form>
+            </div>
+        </a>
+        <a href="{% url 'goods:product_show' product4.id %}">
+            <div class="product-card">
+              <img src={{ product4.image.url }} alt="商品图">
+                <div class="product-name">{{ product4.name }}</div>
+                <div class="product-desc">{{ product4.description }}</div>
+                <div class="product-price">{{ product4.price }}</div>
+                <form method="post" action="{% url 'cart:add' product4.id %}">
+                  {% csrf_token %}
+                  <button type="submit">加入购物车</button>
+                </form>
+            </div>
+        </a>
+
       </div>
     </div>
   </div>

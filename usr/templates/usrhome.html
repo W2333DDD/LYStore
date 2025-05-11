@@ -1,10 +1,8 @@
+{% extends 'head_base.html' %}
+{% block style %}
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>我的淘宝 - 仿版</title>
-  <link rel="stylesheet" href="//at.alicdn.com/t/font_1788322_s4j8ph3zv9.css"> <!-- 淘宝 iconfont 示例 -->
+
   <style>
     * {
       box-sizing: border-box;
@@ -16,39 +14,7 @@
       background-color: #f7f7f7;
     }
 
-    .header {
-      height:86px;
-      background-color: #ff5000;
-      color: black;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
-    }
 
-    .header .logo {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    .header .user-info {
-      display: flex;
-      align-items: center;
-    }
-
-    .header .user-info span {
-      margin-left: 10px;
-      cursor: pointer;
-      background-color: transparent;  /* 默认背景色透明 */
-      padding: 5px 10px;
-      border-radius: 5px;
-      transition: transform 0.2s ease, background-color 0.3s ease;
-    }
-
-    .header .user-info span:hover {
-      transform: scale(1.1);  /* Zoom-in effect */
-      background-color: white;  /* 悬停时背景色变为白色 */
-    }
 
     .container {
       display: flex;
@@ -139,45 +105,22 @@
       }
 
       .zoom-card:hover {
-        transform: scale(1.03);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+          transform: scale(1.03);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
       }
   </style>
-</head>
+
+{% endblock %}
+{% block content %}
 <body>
-  <div class="header">
 
-    <div class="logo" style="display: flex; flex-direction: column; align-items: center;">
-        <img src="{% static 'svg/home.svg' %}" alt="Logo" style="height: 40px;">
-        <span style="margin-top: 10px;">我的淘宝</span>
-    </div>
-
-    <div class="user-info">
-      <a href="/user-profile" style="text-decoration: none; color: inherit;">
-        <i class="iconfont icon-user"></i>
-        <span>旺旺用户</span>
-      </a>
-      <a href="/messages" style="text-decoration: none; color: inherit;">
-        <span>消息</span>
-      </a>
-        <a href={% url 'apppage:firstpage' %} style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; transition: transform 0.3s;">
-          <img src="{% static 'svg/exit.svg' %}" alt="Logo" style="height: 30px; transition: transform 0.3s;">
-          <span style="margin-top: 5px; font-size: 10px;">退出</span>
-        </a>
-
-    </div>
-
-  </div>
 
   <div class="container">
     <div class="sidebar">
       <ul class="menu">
         <!-- 改成这样 -->
         <li onclick="showSection('orders'); setActive(this)">
-          <i class="iconfont icon-dingdan"></i> 我的订单
-        </li>
-        <li onclick="showSection('favorites'); setActive(this)">
-          <i class="iconfont icon-shoucang"></i> 我的收藏
+          <i class="iconfont icon-dingdan"></i> 我的金币
         </li>
         <li onclick="showSection('addresses'); setActive(this)">
           <i class="iconfont icon-dizhi"></i> 地址管理
@@ -194,11 +137,30 @@
 
     <div class="content">
       <div id="orders" class="section">
-        <h3>我的订单</h3>
-        <div class="order-item">订单 #20240501 - 状态：已发货</div>
-        <div class="order-item">订单 #20240502 - 状态：待付款</div>
-        <div class="order-item">订单 #20240503 - 状态：已完成</div>
+          <h3>我的金币</h3>
+          <p>当前金币余额：<strong>{{ request.user.gold_coins }}</strong></p>
+          <button onclick="showRechargeModal()">充值金币</button>
+        </div>
+
+        <!-- 模态框 -->
+        <div id="rechargeModal" style="display:none; position:fixed; top:20%; left:30%; background:#fff; padding:20px; border:1px solid #ccc;">
+          <h4>扫码充值</h4>
+          <img src="{% static 'img/pay.jpg' %}" alt="收款二维码" style="max-width:200px;">
+          <form method="post" action="{% url 'usr:submit_recharge' %}">
+            {% csrf_token %}
+            <label>充值金额：</label>
+            <input type="number" name="amount" required min="1">
+            <button type="submit">提交充值记录</button>
+          </form>
+          <button onclick="document.getElementById('rechargeModal').style.display='none'">关闭</button>
       </div>
+
+      <script>
+          function showRechargeModal() {
+            document.getElementById('rechargeModal').style.display = 'block';
+          }
+      </script>
+
 
       <div id="favorites" class="section" style="display:none;">
         <h3>我的收藏</h3>
@@ -206,33 +168,69 @@
         <div class="favorite-item">商品 B - ￥45.00</div>
       </div>
 
-      <div id="addresses" class="section" style="display:none;">
-        <h3>地址管理</h3>
-        <div class="address-item">张三 - 北京市朝阳区 - 138****8888</div>
-        <div class="address-item">李四 - 上海市浦东新区 - 139****9999</div>
-      </div>
+        <div id="addresses" class="section" style="display:none;">
+          <h3>地址管理</h3>
+          <div class="address-item" id="current-address">{{ request.user.address }}</div>
+          <button onclick="showAddressModal()">修改地址</button>
+        </div>
 
-      <div id="account" class="section" style="display:none;">
-        <h3>账户信息</h3>
-        <p>用户名：wangwang</p>
-        <p>绑定手机号：138****8888</p>
-        <p>邮箱：user@example.com</p>
-      </div>
+        <!-- 修改地址的模态框 -->
+        <div id="addressModal" style="display:none; position:fixed; top:20%; left:30%; background:#fff; padding:20px; border:1px solid #ccc; z-index:1000;">
+          <h4>修改地址</h4>
+          <form method="post" action="{% url 'usr:update_address' %}">
+            {% csrf_token %}
+            <label for="new_address">新地址：</label>
+            <input type="text" id="new_address" name="new_address" required style="width: 300px;">
+            <br><br>
+            <button type="submit">提交</button>
+            <button type="button" onclick="closeAddressModal()">取消</button>
+          </form>
+        </div>
 
-  <a href="{% url 'store:store_detail' store.id %}" style="text-decoration: none; color: inherit;">
-      <div id="store_section" class="section zoom-card" style="display:none;">
-        {% if store.avatar %}
-          <img src="{{ store.avatar.url }}" alt="商店头像" style="width: 200px; border-radius: 4px;">
-        {% else %}
-          <p>暂无商店头像</p>
+        <script>
+          function showAddressModal() {
+            document.getElementById('addressModal').style.display = 'block';
+          }
+
+          function closeAddressModal() {
+            document.getElementById('addressModal').style.display = 'none';
+          }
+        </script>
+
+        <div id="account" class="section" style="display:none;">
+          <h3>账户信息</h3>
+          <p>用户名：{{ request.user.username }}</p>
+          <p>绑定手机号：{{ request.user.phone|default:"未绑定" }}</p>
+          <p>邮箱：{{ request.user.email|default:"未设置" }}</p>
+        </div>
+        {% if store %}
+          <a href="{% url 'store:store_detail' store.id %}" style="text-decoration: none; color: inherit;">
+            <div id="store_info_section" class="section zoom-card" style="display:none;">
+              {% if store.avatar %}
+                <img src="{{ store.avatar.url }}" alt="商店头像" style="width: 200px; border-radius: 4px;">
+              {% else %}
+                <p>暂无商店头像</p>
+              {% endif %}
+              <p><strong>商店名称：</strong>{{ store.name }}</p>
+              <p><strong>商店简介：</strong>{{ store.description }}</p>
+            </div>
+          </a>
         {% endif %}
 
-        <h3>我的商店</h3>
-        <p><strong>商店名称：</strong>{{ store.name }}</p>
-        <p><strong>商店简介：</strong>{{ store.description }}</p>
+        <!-- 始终显示新建商店按钮 -->
+        <div id="store_create_section" class="section" style="display:none; margin-top: 20px;">
+          <h3>创建新的商店</h3>
+          <p>点击下方按钮开设你的专属商店：</p>
+          <a href="{% url 'store:store_enroll' %}">
+            <button style="padding: 8px 16px; background-color: #ff5000; color: white; border: none; border-radius: 4px; cursor: pointer;">创建商店</button>
+          </a>
+        </div>
 
-      </div>
-  </a>
+
+
+
+
+
 
     </div>
   </div>
@@ -240,8 +238,18 @@
   <script>
     function showSection(id) {
       document.querySelectorAll('.section').forEach(el => el.style.display = 'none');
-      document.getElementById(id).style.display = 'block';
+
+      if (id === 'store_section') {
+        const info = document.getElementById('store_info_section');
+        const create = document.getElementById('store_create_section');
+        if (info) info.style.display = 'block';
+        if (create) create.style.display = 'block';  // 仅在点击“我的店铺”时显示
+      } else {
+        const section = document.getElementById(id);
+        if (section) section.style.display = 'block';
+      }
     }
+
 
     function setActive(clickedElement) {
       // 移除所有列表项的 active 类
@@ -252,3 +260,4 @@
   </script>
 </body>
 </html>
+{% endblock %}

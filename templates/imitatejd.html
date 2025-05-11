@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>LYStore</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-color: #f6f6f6;
+    }
+
+    a {
+      text-decoration: none;
+      color: #333;
+    }
+
+    .top-bar {
+      background-color: #f1f1f1;
+      padding: 8px 20px;
+      font-size: 14px;
+      color: #666;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;       /* 垂直居中对齐元素 */
+    }
+
+    .top-bar a {
+      padding: 6px 12px;
+      margin-left: 15px;
+      background-color: #fff;
+      border-radius: 5px;
+      color: #666;
+      border: 1px solid transparent;
+      position: relative;
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    .top-bar a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      height: 2px;
+      width: 0%;
+      background-color: #e2231a;
+      transition: width 0.3s ease;
+    }
+
+    .top-bar a:hover {
+      color: #e2231a;
+      background-color: #fcebec;
+      border-color: #e2231a;
+      transform: scale(1.05);
+    }
+
+    .top-bar a:hover::after {
+      width: 100%;
+    }
+
+
+    .header {
+      background-color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .logo {
+      font-size: 28px;
+      color: #e2231a;
+      font-weight: bold;
+    }
+
+    .search-box {
+      flex: 1;
+      margin: 0 40px;
+      display: flex;
+    }
+
+    .search-box input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #e2231a;
+      border-right: none;
+      border-radius: 4px 0 0 4px;
+      font-size: 16px;
+    }
+
+    .search-box button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #e2231a;
+      color: white;
+      font-size: 16px;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+    }
+
+    .search-box button:hover {
+      background-color: #c81623;
+    }
+
+    .banner {
+      width: 100%;
+      max-width: 800px;  /* 容器宽度设置为图片的宽度 */
+      height: 618px;     /* 容器高度设置为图片的高度 */
+      margin: 20px auto;
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+
+    .slides {
+      display: flex;
+      transition: transform 0.6s ease;
+      width: 100%;  /* 因为有三张图片，所以宽度是 300% */
+    }
+
+    .slide {
+      flex: 0 0 100%; /* 每张图片占据轮播容器的 100% */
+      display: flex;
+      justify-content: center; /* 水平居中 */
+      align-items: center; /* 垂直居中 */
+    }
+
+    .slide img {
+      width: auto;  /* 让图片保持原始宽度 */
+      height: 100%; /* 高度填充容器的高度 */
+      object-fit: contain; /* 确保图片按比例显示，不裁剪 */
+    }
+
+
+
+
+
+
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(0, 0, 0, 0.3);
+      color: white;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 10px;
+      z-index: 2;
+    }
+
+    .prev {
+      left: 10px;
+    }
+
+    .next {
+      right: 10px;
+    }
+
+    .dots {
+      position: absolute;
+      bottom: 15px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      margin: 0 5px;
+      border-radius: 50%;
+      background-color: #ddd;
+      cursor: pointer;
+    }
+
+    .dot.active {
+      background-color: #e2231a;
+    }
+
+    .main {
+      display: flex;
+      max-width: 1200px;
+      margin: 20px auto;
+    }
+
+    .sidebar {
+      width: 200px;
+      background-color: white;
+      padding: 20px;
+      border: 1px solid #ddd;
+    }
+
+    .sidebar h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar li {
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .sidebar li:hover {
+      background-color: #ffeaea;
+      transform: scale(1.03);
+    }
+
+    .sidebar li a {
+      display: block;
+      color: #333;
+      transition: color 0.3s ease;
+    }
+
+    .sidebar li a:hover {
+      color: #e2231a;
+    }
+
+
+
+    .content {
+      flex: 1;
+      margin-left: 20px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .product-card {
+      background-color: white;
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+
+    .product-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+    }
+
+    .product-name {
+      font-size: 14px;
+      margin: 10px 0;
+    }
+
+    .product-price {
+      color: #e2231a;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .product-desc {
+      font-size: 13px;
+      color: #666;
+      margin: 5px 0;
+      height: 38px;
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+
+    .footer {
+      background-color: #333;
+      color: #ccc;
+      text-align: center;
+      padding: 30px 0;
+      margin-top: 40px;
+      font-size: 14px;
+    }
+
+    .footer a {
+      color: #ccc;
+      margin: 0 8px;
+    }
+
+    .footer a:hover {
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+    <div class="top-bar">
+      <span>欢迎来到仿京东商城</span>
+      {% if user.is_authenticated %}
+        <span style="margin-left: 15px;">欢迎你，{{ user.username }}</span>
+        <a href="{% url 'usr:logout' %}">退出登录</a>
+        <a href="#">我的订单</a>
+        <a href={% url 'usr:usrhome' %}>个人中心</a>
+      {% else %}
+        <a href="{% url 'usr:login' %}">登录</a>
+        <a href="{% url 'usr:register' %}">注册</a>
+      {% endif %}
+    </div>
+
+
+  <div class="header">
+    <div class="logo">LYStore</div>
+    <div class="search-box">
+        <form class="search-box" method="get" action="{% url 'goods:search_view' %}">
+          <input type="text" name="q" placeholder="搜索商品、品牌、分类">
+          <button type="submit">搜索</button>
+        </form>
+    </div>
+  </div>
+
+  <div class="banner">
+    <div class="slides" id="slides">
+      <div class="slide"><img src="{% static 'img/yuwenbook1.jpg'  %}"alt=""></div>
+      <div class="slide"><img src="{% static 'img/mathbook1.jpg'  %}"alt=""></div>
+      <div class="slide"><img src="{% static 'img/englishbook1.jpg'  %}"alt=""></div>
+{#      <div class="slide"><img src="https://img2.baidu.com/it/u=3562482999,1631548780&fm=253&fmt=auto&app=120&f=JPEG?w=1200&h=360" alt=""></div>#}
+{#      <div class="slide"><img src="https://img1.baidu.com/it/u=2111261712,2001471173&fm=253&fmt=auto&app=138&f=JPEG?w=1200&h=360" alt=""></div>#}
+    </div>
+    <button class="nav-btn prev" onclick="prevSlide()">❮</button>
+    <button class="nav-btn next" onclick="nextSlide()">❯</button>
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <div class="main">
+    <div class="sidebar">
+      <h3>商品分类</h3>
+      <ul>
+        <li><a href="#">手机通讯</a></li>
+        <li><a href="#">电脑办公</a></li>
+        <li><a href="#">家用电器</a></li>
+        <li><a href="#">服饰鞋包</a></li>
+        <li><a href="#">图书音像</a></li>
+        <li><a href="#">母婴用品</a></li>
+        <li><a href="#">食品饮料</a></li>
+      </ul>
+    </div>
+    <div class="content">
+      <div class="product-grid">
+        <div class="product-card">
+          <img src={% static "img/jw.jpg" %} alt="商品图">
+          <div class="product-name">计算机网络</div>
+          <div class="product-desc">好书，买！！！</div>
+          <div class="product-price">￥9.9</div>
+        </div>
+        <div class="product-card">
+          <img src={% static "img/ty.jpg" %} alt="商品图">
+          <div class="product-name">通信原理</div>
+            <div class="product-desc">书好，买！！！</div>
+          <div class="product-price">￥9.8</div>
+        </div>
+        <div class="product-card">
+          <img src={% static "img/ss.jpg" %} alt="商品图">
+          <div class="product-name">信号与系统</div>
+            <div class="product-desc">好好，买！！！</div>
+          <div class="product-price">￥9.7</div>
+        </div>
+        <div class="product-card">
+          <img src={% static "img/networkdg.jpg" %} alt="商品图">
+          <div class="product-name">网络程序设计</div>
+            <div class="product-desc">书书，买！！！</div>
+          <div class="product-price">￥9.6</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>
+      <a href="#">关于我们</a> |
+      <a href="#">联系我们</a> |
+      <a href="#">帮助中心</a> |
+      <a href="#">售后服务</a>
+    </div>
+    <div style="margin-top: 10px;">
+      ©2025 仿京东商城 - 本页面仅供学习使用
+    </div>
+  </div>
+
+  <script>
+    const slides = document.getElementById('slides');
+    const dotsContainer = document.getElementById('dots');
+    const totalSlides = slides.children.length;
+    let index = 0;
+
+    for (let i = 0; i < totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    }
+
+    function updateDots() {
+      [...dotsContainer.children].forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+    }
+
+    function goToSlide(i) {
+      index = i;
+      slides.style.transform = `translateX(-${index * 100}%)`;
+      updateDots();
+    }
+
+    function nextSlide() {
+      index = (index + 1) % totalSlides;
+      goToSlide(index);
+    }
+
+    function prevSlide() {
+      index = (index - 1 + totalSlides) % totalSlides;
+      goToSlide(index);
+    }
+
+    setInterval(nextSlide, 3000);
+  </script>
+</body>
+</html>

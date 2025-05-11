@@ -1,0 +1,96 @@
+{% extends 'head_base.html' %}
+
+{% block title %}搜索结果 - LYStore{% endblock %}
+
+{% block style %}
+<style>
+  .product-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+    padding: 20px;
+  }
+
+  .product-card {
+    flex: 0 0 calc(25% - 20px);
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #fff;
+    overflow: hidden;
+  }
+
+  .product-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+
+  .product-card img {
+    width: 100%;
+    max-height: 180px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+
+  .product-card:hover img {
+    transform: scale(1.05);
+  }
+
+  .product-name {
+    font-weight: bold;
+    margin-top: 12px;
+    font-size: 1.1em;
+  }
+
+  .product-desc {
+    color: #666;
+    margin: 8px 0;
+    font-size: 0.9em;
+    height: 2.4em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .product-price {
+    color: #e60012;
+    font-size: 1.3em;
+    margin-top: 5px;
+  }
+
+  @media (max-width: 768px) {
+    .product-card {
+      flex: 0 0 calc(50% - 20px);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .product-card {
+      flex: 0 0 100%;
+    }
+  }
+</style>
+{% endblock %}
+
+
+{% block content %}
+  <h2 style="margin-bottom: 20px;">搜索结果：{{ query }}</h2>
+  <div class="product-grid">
+    {% for product in results %}
+      <a href="{% url 'goods:product_show' product.pk %}" style="text-decoration: none; color: inherit;">
+        <div class="product-card">
+          <!-- 如果商品没有图片，显示默认图片 -->
+          <img src="{{ product.image.url }}" alt="{{ product.name }}">
+          <div class="product-name">{{ product.name }}</div>
+          <div class="product-desc">{{ product.description }}</div>
+          <div class="product-price">￥{{ product.price }}</div>
+        </div>
+      </a>
+    {% empty %}
+      <p>未找到与 “{{ query }}” 相关的商品。</p>
+    {% endfor %}
+  </div>
+{% endblock %}

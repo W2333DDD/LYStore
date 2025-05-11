@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}提交评论{% endblock %}
+
+{% block style %}
+{{ block.super }}
+<!-- 你可以在这里加入该页面独有的 CSS -->
+{% endblock %}
+
+{% block content %}
+<!-- 页面主体部分，如 banner、sidebar、商品卡片等 -->
+    {% form %}
+<div class="banner"> ... </div>
+<div class="main"> ... </div>
+{% endblock %}

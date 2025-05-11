@@ -1,0 +1,16 @@
+<!-- store/templates/store/my_shop.html -->
+<h2>我的商店</h2>
+<p>商店名称：{{ shop.name }}</p>
+<p>审核状态：
+  {% if shop.is_approved %}
+    ✅ 已通过审核
+      {% if store.avatar %}
+          <img src="{{ store.avatar.url }}" alt="商店头像" style="width: 200px; border-radius: 8px;">
+      {% else %}
+          <p>暂无商店头像</p>
+      {% endif %}
+
+  {% else %}
+    ⏳ 审核中，请耐心等待
+  {% endif %}
+</p>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.name }} - 商品详情</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .product-detail {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .product-image, .product-video {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .product-image {
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            text-decoration: none;
+            color: #ff5000;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .edit-btn {
+            display: inline-block;
+            margin-top: 1.5rem;
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .edit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .section {
+            margin-top: 2rem;
+        }
+
+        /* 3D 模型展示容器 */
+        #model-container {
+            width: 100%;
+            height: 400px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        /* Progress Bar Styling */
+        #progress-bar-container {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        #progress-bar {
+            width: 0;
+            height: 20px;
+            background-color: #007bff;
+            border-radius: 10px;
+        }
+    </style>
+
+    <!-- 引入 three.js 库 -->
+    <!-- 先引入three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- 再引入GLTFLoader -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+</head>
+<body>
+    <div class="product-detail">
+        <a href="javascript:history.back()" class="back-link">← 返回</a>
+
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="商品图片" class="product-image" style="width: 300px; height: auto;">
+        {% endif %}
+
+        <h1>{{ product.name }}</h1>
+        <p><strong>价格：</strong>￥{{ product.price }}</p>
+        <p><strong>简介：</strong>{{ product.description }}</p>
+
+        {% if product.video %}
+        <div class="section">
+            <h3>商品视频</h3>
+            <video class="product-video" controls>
+                <source src="{{ product.video.url }}" type="video/mp4">
+                您的浏览器不支持 video 标签。
+            </video>
+        </div>
+        {% endif %}
+        <div class="section">
+            <h3>3D 模型</h3>
+            {% if product.tripo_3d_model %}
+                <p>模型地址: {{ product.tripo_3d_model.url }}</p>
+                <div id="model-container"></div>
+                <script>
+                    var scene = new THREE.Scene();
+                    var camera = new THREE.PerspectiveCamera(75, document.getElementById("model-container").clientWidth / document.getElementById("model-container").clientHeight, 0.1, 1000);
+                    var renderer = new THREE.WebGLRenderer({ antialias: true });
+                    renderer.setSize(document.getElementById("model-container").clientWidth, document.getElementById("model-container").clientHeight);
+                    renderer.setClearColor(0xf0f0f0);
+                    document.getElementById("model-container").appendChild(renderer.domElement);
+
+                    // 添加灯光
+                    var light = new THREE.HemisphereLight(0xffffff, 0x444444, 5);
+                    scene.add(light);
+
+                    // 添加控制器
+                    var controls = new THREE.OrbitControls(camera, renderer.domElement);
+                    controls.enableDamping = true;
+                    controls.dampingFactor = 0.05;
+                    controls.enableZoom = true;
+                    controls.enableRotate = true;
+
+                    var loader = new THREE.GLTFLoader();
+                    loader.load(
+                        "{{ product.tripo_3d_model.url }}",
+                        function(gltf) {
+                            console.log("模型加载成功！");
+                            scene.add(gltf.scene);
+                            gltf.scene.scale.set(2, 2, 2);
+
+                            camera.position.set(0, 1, 5);
+
+                            var animate = function() {
+                                requestAnimationFrame(animate);
+                                controls.update();  // 更新交互控制
+                                renderer.render(scene, camera);
+                            };
+                            animate();
+
+                            alert("3D 模型加载成功！");
+                        },
+                        function(xhr) {
+                            console.log('加载进度: ' + (xhr.loaded / xhr.total * 100) + '%');
+                        },
+                        function(error) {
+                            console.error("加载3D模型时出错：", error);
+                            alert("加载3D模型失败，请检查文件路径或格式！");
+                        }
+                    );
+                </script>
+
+
+
+
+
+            {% else %}
+                <button class="edit-btn btn-warning" onclick="create3DModel()">✨ 创建3D模型</button>
+                <div id="progress-bar-container">
+                    <h4>生成进度</h4>
+                    <div id="progress-bar"></div>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <script>
+    function create3DModel() {
+        if (confirm("当前商品没有3D模型，是否使用图片生成？")) {
+            // 显示进度条
+            document.getElementById("progress-bar-container").style.display = "block";
+            var progressBar = document.getElementById("progress-bar");
+
+            // 发送请求开始生成模型
+            fetch("{% url 'goods:create_tripo_model' product.id %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    // 开始轮询检查任务状态
+                    checkModelGenerationProgress();
+                }
+            })
+            .catch(err => {
+                alert("请求失败，请稍后再试！");
+                // 隐藏进度条
+                document.getElementById("progress-bar-container").style.display = "none";
+            });
+        }
+    }
+
+    function checkModelGenerationProgress() {
+        var progressBar = document.getElementById("progress-bar");
+
+        // 每2秒检查一次进度
+        var interval = setInterval(function() {
+            fetch("{% url 'goods:check_tripo_model_status' product.id %}")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.message === "3D模型已下载并保存。") {
+                            // 模型生成完成，清除定时器，刷新页面
+                            clearInterval(interval);
+                            alert("3D模型生成完成！");
+                            location.reload();
+                        } else {
+                            // 模型生成中，更新进度条
+                            var progress = Math.min(parseInt(data.message), 100); // 假设 API 返回百分比进度
+                            progressBar.style.width = progress + "%";
+                        }
+                    } else {
+                        clearInterval(interval);
+                        alert("生成3D模型失败或已取消！");
+                        document.getElementById("progress-bar-container").style.display = "none";
+                    }
+                })
+                .catch(err => {
+                    {#alert("检查进度失败，请稍后再试！");#}
+                    {#clearInterval(interval);#}
+                    {#document.getElementById("progress-bar-container").style.display = "none";#}
+                });
+        }, 2000);
+    }
+    </script>
+</body>
+</html>

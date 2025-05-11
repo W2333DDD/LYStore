@@ -1,0 +1,65 @@
+<!-- store/templates/store/store_register.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>注册商店</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 40px;
+    }
+    .container {
+      background-color: #fff;
+      padding: 30px;
+      max-width: 600px;
+      margin: 0 auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    form label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    form input, form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    .submit-btn {
+      display: block;
+      margin: 30px auto 0;
+      background-color: #ff5000;
+      color: white;
+      padding: 12px 25px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .submit-btn:hover {
+      background-color: #e04000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>注册商店</h2>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="submit-btn">提交注册</button>
+    </form>
+  </div>
+</body>
+</html>
